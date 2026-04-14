@@ -11,8 +11,8 @@ export interface IChat extends Document {
 export interface IChatResponse {
     _id: string
     participants: string[]
-    lastMessage: string
-    lastMessageAt: Date
+    lastMessage?: string
+    lastMessageAt?: Date
     createdAt: Date
     updatedAt: Date
 }
