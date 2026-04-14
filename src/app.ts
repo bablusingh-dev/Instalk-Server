@@ -1,11 +1,15 @@
 import express, { Application, NextFunction, Request, Response } from 'express'
 import path from 'path'
-import router from './routes/apiRouter'
+import router from './routes/apiRoutes'
 import globalErrorHandler from './middlewares/globalErrorHandler'
 import responseMessage from './constants/responseMessage'
 import httpError from './utils/httpError'
 import helmet from 'helmet'
 import cors from 'cors'
+import authRoutes from './routes/authRoutes'
+import userRoutes from './routes/userRoutes'
+import messageRoutes from './routes/messageRoutes'
+import chatRoutes from './routes/chatRoutes'
 
 
 const app: Application = express()
@@ -24,6 +28,10 @@ app.use(express.static(path.join(__dirname, '../', 'public')))
 
 // Routes
 app.use('/', router)
+app.use('/api/v1/auth', authRoutes)
+app.use('/api/v1/users', userRoutes)
+app.use('/api/v1/messages', messageRoutes)
+app.use('/api/v1/chats', chatRoutes)
 
 // 404 Handler
 app.use((req: Request, _: Response, next: NextFunction) => {
