@@ -31,16 +31,20 @@ export default {
             const user = await User.findOne({ clerkId })
             if (!user) {
                 const clerkUser = await clerkClient.users.getUser(clerkId)
-                const newUser = new User({
-                    clerkId,
-                    email: clerkUser.emailAddresses[0]?.emailAddress,
-                    name: clerkUser.firstName
-                        ? `${clerkUser.firstName}" "${clerkUser.lastName}`
-                        : clerkUser.emailAddresses[0]?.emailAddress.split('@')[0],
-                    profilePicture: clerkUser.imageUrl
-                })
-                await newUser.save()
+                const primaryEmail = clerkUser.emailAddresses[0]?.emailAddress
+                const fullName = clerkUser.firstName
+                    ? `${clerkUser.firstName}" "${clerkUser.lastName}`
+                    : clerkUser.emailAddresses[0]?.emailAddress.split('@')[0]
+
+                await User.findOneAndUpdate(
+                    { clerkId },
+                    {
+                        $setOnInsert: { clerkId, email: primaryEmail, name: fullName, avatar: clerkUser.imageUrl ?? '' }
+                    },
+                    { upsert: true, new: true, setDefaultsOnInsert: true }
+                )
             }
+
             return httpResponse(req, res, 200, responseMessage.SUCCESS)
         } catch (error) {
             return httpError(next, error, req, 500)

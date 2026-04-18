@@ -18,7 +18,7 @@ export default {
             req.userId = user._id.toString()
             next()
         } catch (error) {
-            return httpError(next, error, req, 401)
+            return httpError(next, error, req)
         }
     }
 }

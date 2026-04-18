@@ -11,7 +11,7 @@ export default {
     // Database
     DATABASE_URL: process.env['DATABASE_URL'],
 
-    // Clerk    CLERK_PUBLISHABLE_KEY: process.env['CLERK_PUBLISHABLE_KEY'],
+    // Clerk
     CLERK_SECRET_KEY: process.env['CLERK_SECRET_KEY'],
     CLERK_PUBLISHABLE_KEY: process.env['CLERK_PUBLISHABLE_KEY'],
 } as const
