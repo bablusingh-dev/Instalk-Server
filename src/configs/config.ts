@@ -9,5 +9,9 @@ export default {
     SERVER_URL: process.env['SERVER_URL'],
 
     // Database
-    DATABASE_URL: process.env['DATABASE_URL']
+    DATABASE_URL: process.env['DATABASE_URL'],
+
+    // Clerk
+    CLERK_SECRET_KEY: process.env['CLERK_SECRET_KEY'],
+    CLERK_PUBLISHABLE_KEY: process.env['CLERK_PUBLISHABLE_KEY'],
 } as const
