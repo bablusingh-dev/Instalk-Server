@@ -4,7 +4,7 @@
     "description": "",
     "main": "src/server.js",
     "scripts": {
-        "build": "npx tsc",
+        "build": "npx tsc && npx tsc-alias",
         "dev": "cross-env NODE_ENV=development nodemon --exec ts-node src/server.ts",
         "start": "cross-env NODE_ENV=production node dist/server.js",
         "lint": "eslint",
@@ -37,6 +37,7 @@
         "nodemon": "^3.1.14",
         "prettier": "3.8.2",
         "ts-node": "^10.9.2",
+        "tsc-alias": "^1.8.16",
         "tsconfig-paths": "^4.2.0",
         "typescript": "^6.0.2",
         "typescript-eslint": "^8.58.1"
