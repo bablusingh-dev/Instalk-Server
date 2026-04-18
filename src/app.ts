@@ -10,6 +10,7 @@ import authRoutes from './routes/authRoutes'
 import userRoutes from './routes/userRoutes'
 import messageRoutes from './routes/messageRoutes'
 import chatRoutes from './routes/chatRoutes'
+import { clerkMiddleware } from '@clerk/express'
 
 
 const app: Application = express()
@@ -25,6 +26,8 @@ app.use(
 )
 app.use(express.json())
 app.use(express.static(path.join(__dirname, '../', 'public')))
+
+app.use(clerkMiddleware())
 
 // Routes
 app.use('/', router)

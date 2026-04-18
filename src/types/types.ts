@@ -1,3 +1,5 @@
+import { Request } from 'express'
+
 export type THttpResponse = {
     success: boolean
     statusCode: number
@@ -22,3 +24,8 @@ export type THttpError = {
     data: unknown
     trace?: object | null
 }
+
+export type AuthRequest = Request & {
+    userId?: string
+}
+

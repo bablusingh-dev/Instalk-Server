@@ -54,10 +54,13 @@
             "@utils/*": ["src/utils/*"],
             "@configs/*": ["src/configs/*"],
             "@models/*": ["src/models/*"],
-            "@constants/*": ["src/constants/*"],
+            "@constants/*": ["src/constants/*"]
         }
     },
-    "include": ["src/**/*"],
+    "ts-node": {
+        "require": ["tsconfig-paths/register"]
+    },
+    "include": ["src/**/*", "src/types"],
     "exclude": ["node_modules", "dist", "public"]
 }
 
