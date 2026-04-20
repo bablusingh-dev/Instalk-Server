@@ -11,7 +11,7 @@ import userRoutes from './routes/userRoutes'
 import messageRoutes from './routes/messageRoutes'
 import chatRoutes from './routes/chatRoutes'
 import { clerkMiddleware } from '@clerk/express'
-
+import config from './configs/config'
 
 const app: Application = express()
 
@@ -20,7 +20,7 @@ app.use(helmet())
 app.use(
     cors({
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'HEAD'],
-        origin: ['https://client.com'],
+        origin: [config.CLIENT_URL!, config.MOBILE_CLIENT_URL!],
         credentials: true
     })
 )
@@ -49,4 +49,3 @@ app.use((req: Request, _: Response, next: NextFunction) => {
 app.use(globalErrorHandler)
 
 export default app
-
