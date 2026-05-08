@@ -1,1 +1,12 @@
-node_modules
+node_modulesnode_modules
+npm-debug.log
+.git
+.gitignore
+README.md
+.env
+.env.local
+.DS_Store
+.expo
+mobile
+*.md
+.vscode
