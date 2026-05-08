@@ -6,12 +6,18 @@ import { verifyToken } from '@clerk/express'
 import { Server as HttpServer } from 'node:http'
 import { Server as SocketServer } from 'socket.io'
 
-export const onlineUsers: Map<string, string> = new Map()
+export const onlineUsers: Map<string, Set<string>> = new Map()
 
 export const initializeSocket = (httpServer: HttpServer) => {
+    const origins = [config.CLIENT_URL, config.MOBILE_CLIENT_URL].filter((url): url is string => !!url)
+
+    if (origins.length === 0) {
+        throw new Error('At least one client origin (CLIENT_URL or MOBILE_CLIENT_URL) must be configured for socket CORS.')
+    }
+
     const io = new SocketServer(httpServer, {
         cors: {
-            origin: [config.CLIENT_URL!, config.MOBILE_CLIENT_URL!]
+            origin: origins
         }
     })
     io.use((socket, next) => {
@@ -51,14 +57,32 @@ export const initializeSocket = (httpServer: HttpServer) => {
         socket.emit('online-users', { userIds: Array.from(onlineUsers.keys()) })
 
         // store user in the onlineUsers map
-        onlineUsers.set(userId, socket.id)
+        let userSockets = onlineUsers.get(userId)
+        let isFirstConnection = false
+        if (!userSockets) {
+            userSockets = new Set()
+            onlineUsers.set(userId, userSockets)
+            isFirstConnection = true
+        }
+        userSockets.add(socket.id)
 
-        // notify others that this current user is online
-        socket.broadcast.emit('user-online', { userId })
+        if (isFirstConnection) {
+            // notify others that this current user is online
+            socket.broadcast.emit('user-online', { userId })
+        }
         socket.join(`user:${userId}`)
 
-        socket.on('join-chat', (chatId: string) => {
-            socket.join(`chat:${chatId}`)
+        socket.on('join-chat', async (chatId: string) => {
+            try {
+                const chat = await Chat.findOne({ _id: chatId, participants: userId })
+                if (chat) {
+                    socket.join(`chat:${chatId}`)
+                } else {
+                    socket.emit('socket-error', { message: 'Unauthorized to join this chat' })
+                }
+            } catch {
+                socket.emit('socket-error', { message: 'Failed to join chat' })
+            }
         })
 
         socket.on('leave-chat', (chatId: string) => {
@@ -104,23 +128,23 @@ export const initializeSocket = (httpServer: HttpServer) => {
         })
 
         socket.on('typing', async (data: { chatId: string; isTyping: boolean }) => {
-            const typingPayload = {
-                userId,
-                chatId: data.chatId,
-                isTyping: data.isTyping
-            }
-
-            // emit to chat room (for users inside the chat)
-            socket.to(`chat:${data.chatId}`).emit('typing', typingPayload)
-
-            // also emit to other participant's personal room (for chat list view)
             try {
-                const chat = await Chat.findById(data.chatId)
-                if (chat) {
-                    const otherParticipantId = chat.participants.find((p) => p.toString() !== userId)
-                    if (otherParticipantId) {
-                        socket.to(`user:${otherParticipantId.toString()}`).emit('typing', typingPayload)
-                    }
+                const chat = await Chat.findOne({ _id: data.chatId, participants: userId })
+                if (!chat) return
+
+                const typingPayload = {
+                    userId,
+                    chatId: data.chatId,
+                    isTyping: data.isTyping
+                }
+
+                // emit to chat room (for users inside the chat)
+                socket.to(`chat:${data.chatId}`).emit('typing', typingPayload)
+
+                // also emit to other participant's personal room (for chat list view)
+                const otherParticipantId = chat.participants.find((p) => p.toString() !== userId)
+                if (otherParticipantId) {
+                    socket.to(`user:${otherParticipantId.toString()}`).emit('typing', typingPayload)
                 }
             } catch {
                 // silently fail - typing indicator is not critical
@@ -128,8 +152,14 @@ export const initializeSocket = (httpServer: HttpServer) => {
         })
 
         socket.on('disconnect', () => {
-            onlineUsers.delete(userId)
-            socket.broadcast.emit('user-offline', { userId })
+            const userSockets = onlineUsers.get(userId)
+            if (userSockets) {
+                userSockets.delete(socket.id)
+                if (userSockets.size === 0) {
+                    onlineUsers.delete(userId)
+                    socket.broadcast.emit('user-offline', { userId })
+                }
+            }
         })
     })
 
