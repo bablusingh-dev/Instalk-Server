@@ -3,8 +3,12 @@ import config from './configs/config'
 import { initRateLimiter } from './configs/rateLimiter'
 import databaseService from './services/databaseService'
 import logger from './utils/logger'
+import { createServer } from 'http'
+import { initializeSocket } from './utils/socket'
 
-const server = app.listen(config.PORT)
+const server = createServer(app)
+export const httpServer = server.listen(config.PORT)
+initializeSocket(httpServer)
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 ;(async () => {

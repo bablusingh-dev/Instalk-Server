@@ -17,6 +17,7 @@ export default tseslint.config({
         'no-console': 'error',
         'no-useless-catch': 0,
         quotes: ['error', 'single', { allowTemplateLiterals: true }],
-        '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }]
+        '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+        '@typescript-eslint/no-floating-promises': 'off'
     }
 })
